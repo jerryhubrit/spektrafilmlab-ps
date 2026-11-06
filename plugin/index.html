@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+<header><div><h2>SpektraFilmLab <span>RAW 显影工作台</span></h2><p>01 打开 RAW　→　02 显影前调整　→　03 送入 Photoshop 精修</p></div><div class="actions"><button id="connect">连接引擎</button><button id="capture">读取 PS 图像</button><button id="openRaw" class="primary">打开 RAW…</button></div></header>
+<main><section class="canvas"><div id="fileInfo">尚未打开照片</div><div id="previewBox"><img id="preview"><p id="placeholder">打开一张 RAW，开始胶片显影<br>照片全程在本机处理</p></div><div class="previewbar"><button id="compare" disabled>按住看显影前</button><span id="timing">适合窗口 · 1024 px 预览</span></div></section>
+<aside><h3>片边</h3><label class="check"><input id="edgeActive" type="checkbox">启用胶片边框</label><p id="edgeHint" class="hint"></p><div id="edgeFields"><label>片边／日期后背画幅<select id="edgeFormat"><option value="135">135 · 全画幅</option><option value="135_half">135 · 半格</option><option value="120_645">120 · 645</option><option value="120_6x6">120 · 6×6</option><option value="120_6x7">120 · 6×7</option><option value="120_6x8">120 · 6×8</option><option value="120_6x9">120 · 6×9</option><option value="135_xpan">135 · XPan</option><option value="120_6x12">120 · 6×12</option><option value="120_6x17">120 · 6×17</option></select></label>
+<label>扫描范围<select id="edgeMode"><option value="strip">整条片边</option><option value="filed">放大机片夹边缘</option></select></label>
+<label>片窗形状<select id="edgeGate"><option value="auto">自动 · 随相机</option><option value="square">方角</option><option value="rounded">圆角</option><option value="eared">耳形</option><option value="shouldered">肩形</option><option value="kicked">切角</option></select></label>
+<label>齿孔底色<select id="edgeHoles"><option value="white">白色 · 扫描灯</option><option value="black">黑色 · 遮光背板</option></select></label>
+<label>片外区域<select id="edgeCarrier"><option value="none">仅胶片</option><option value="black">黑色片夹</option><option value="open">透光</option></select></label>
+<label>边码帧号 · 0 为自动<input id="frameNumber" type="number" min="0" max="99" step="1" value="1"></label>
+<div class="actions"><button id="newCamera">换一台相机</button><button id="newFrame">换一格片边</button></div><p id="seedInfo" class="hint"></p><div class="control"><label>边缘雾光<span id="edgeFogValue"></span></label><input id="edgeFog" type="range" min="0" max="4" step="0.1" value="1"></div>
+<div class="control"><label>漏光<span id="edgeLeaksValue"></span></label><input id="edgeLeaks" type="range" min="0" max="4" step="0.1" value="0"></div>
+<div class="control"><label>构图 · 左右<span id="cropXValue"></span></label><input id="cropX" type="range" min="0" max="100" step="1" value="50"></div>
+<div class="control"><label>构图 · 上下<span id="cropYValue"></span></label><input id="cropY" type="range" min="0" max="100" step="1" value="50"></div>
+</div><h3>日期后背</h3><label class="check"><input id="dateActive" type="checkbox">启用日期后背</label><p id="dateHint" class="hint"></p><div id="dateFields"><label>字形<select id="dateStyle"><option value="lcd">LCD · 七段数码</option><option value="dots">点阵日期</option><option value="data">拍摄数据</option></select></label>
+<label>日期来源<select id="dateSource"><option value="exif">照片拍摄日期</option><option value="manual">手动指定</option></select></label>
+<label>手动日期<input id="dateValue" type="text" placeholder="YYYY-MM-DD" maxlength="10"></label><label>日期顺序<select id="dateOrder"><option value="japan">年 月 日 · '26 11 6</option><option value="us">月 日 年 · 11 6 '26</option></select></label>
+<label>打印位置<select id="datePlacement"><option value="frame">画面内</option><option value="rebate">画面之间／片边</option></select></label>
+<label>角落 · 相机横持时<select id="dateCorner"><option value="br">右下</option><option value="bl">左下</option><option value="tr">右上</option><option value="tl">左上</option></select></label>
+<label class="check"><input id="dateWithData" type="checkbox">同时打印拍摄参数（需要片边）</label><div class="control"><label>字符大小<span id="dateSizeValue"></span></label><input id="dateSize" type="range" min="0.4" max="3" step="0.1" value="1"></div>
+<div class="control"><label>发光亮度 · EV<span id="dateEVValue"></span></label><input id="dateEV" type="range" min="-2" max="8" step="0.1" value="3.5"></div>
+<p class="hint">竖拍时日期随相机旋转；120 日期打印在片边上。照片没有的拍摄参数不会补造。</p></div><h3>相机与曝光</h3><label>测光<select id="metering"><option value="balanced">均衡测光</option><option value="center">中央测光</option><option value="protect_highlights">保护高光</option><option value="protect_shadows">保护阴影</option><option value="off">关闭自动测光</option></select></label>
+<div class="control"><label>胶片曝光<span id="exposureValue"></span></label><input id="exposure" type="range" min="-4" max="4" step="0.1" value="0"></div>
+<label>RAW 白平衡<select id="wb"><option value="camera">拍摄时设置</option><option value="custom">自定义</option></select></label>
+<div class="control"><label>色温 · K<span id="temperatureValue"></span></label><input id="temperature" type="range" min="2000" max="12000" step="50" value="5500"></div><div class="control"><label>色调<span id="tintValue"></span></label><input id="tint" type="range" min="-150" max="150" step="1" value="0"></div>
+<label class="check"><input id="lens" type="checkbox">启用镜头校正</label><p id="rawHint" class="hint">打开 RAW 后启用色温、色调和镜头校正。</p>
+<h3>场景宽容度</h3><p id="latitudeInfo" class="hint">由原引擎测量场景和胶片的可用范围。</p>
+<div class="control"><label>高光收回 · EV<input id="highlightPull" type="number" min="0" max="12" step="0.25" value="0"></label></div>
+<div class="control"><label>阴影收回 · EV<input id="shadowPull" type="number" min="0" max="3.75" step="0.25" value="0"></label></div>
+<div class="actions"><button id="autoFit">自动适配</button><button id="fit">应用收回</button><button id="clearFit">重置</button></div>
+<h3>胶片与画幅</h3><label>胶片<select id="film"></select></label><label>相纸<select id="paper"></select></label>
+<label>胶片长边<select id="format"><option value="36">35 mm · 长边 36 mm</option><option value="56">中画幅 · 长边 56 mm</option><option value="70">中画幅 · 长边 70 mm</option><option value="127">大画幅 · 长边 127 mm</option></select></label>
+<div class="control"><label>颗粒<span id="grainValue"></span></label><input id="grain" type="range" min="0" max="2" step="0.05" value="0"></div><div class="control"><label>光晕<span id="halationValue"></span></label><input id="halation" type="range" min="0" max="4" step="0.05" value="1"></div><div class="control"><label>散射<span id="scatterValue"></span></label><input id="scatter" type="range" min="0" max="1" step="0.01" value="1"></div><div class="control"><label>染料耦合<span id="couplersValue"></span></label><input id="couplers" type="range" min="0" max="4" step="0.05" value="1"></div><div class="control"><label>相纸眩光<span id="glareValue"></span></label><input id="glare" type="range" min="0" max="30" step="0.25" value="0"></div>
+<h3>冲印预览</h3><p class="hint">控制胶片的冲印呈现；曲线与局部精修可送入 PS 后继续。</p>
+<div class="control"><label>冲印亮度<span id="brightnessValue"></span></label><input id="brightness" type="range" min="-2" max="2" step="0.1" value="0"></div><div class="control"><label>洋红滤色<span id="magentaValue"></span></label><input id="magenta" type="range" min="-0.5" max="0.5" step="0.01" value="0"></div><div class="control"><label>黄色滤色<span id="yellowValue"></span></label><input id="yellow" type="range" min="-0.5" max="0.5" step="0.01" value="0"></div>
+</aside></main>
+<div class="bottom"><p id="status">正在加载插件脚本…</p><div class="actions"><button id="reset">重置参数</button><button id="apply" class="primary" disabled>显影并送入 Photoshop</button></div></div>
+<footer>RAW → 16 位 ProPhoto RGB 新文档 · 保留原始文件 · 全尺寸输出　 |　SpektraLab 原生胶片引擎 · 非官方插件 · 0.3.1</footer>
+<script src="bootstrap.js"></script></body></html>

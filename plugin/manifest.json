@@ -1,0 +1,80 @@
+{
+  "manifestVersion": 5,
+  "id": "io.github.jerryhubrit.spektrafilmlab.ps",
+  "name": "SpektraFilmLab PS",
+  "version": "0.3.1",
+  "main": "index.html",
+  "host": {
+    "app": "PS",
+    "minVersion": "25.0.0",
+    "data": {
+      "apiVersion": 2
+    }
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "rawWorkbench",
+      "label": {
+        "default": "SpektraFilmLab RAW 显影工作台"
+      },
+      "minimumSize": {
+        "width": 900,
+        "height": 650
+      },
+      "preferredDockedSize": {
+        "width": 1000,
+        "height": 780
+      },
+      "preferredFloatingSize": {
+        "width": 1180,
+        "height": 820
+      }
+    },
+    {
+      "type": "command",
+      "id": "readCurrentImage",
+      "label": {
+        "default": "读取当前图像"
+      }
+    },
+    {
+      "type": "command",
+      "id": "applyFilmLayer",
+      "label": {
+        "default": "送入 Photoshop"
+      }
+    },
+    {
+      "type": "command",
+      "id": "openRAW",
+      "label": {
+        "default": "打开 RAW 显影"
+      }
+    },
+    {
+      "type": "command",
+      "id": "toggleFilmEdge",
+      "label": {
+        "default": "开启／关闭片边"
+      }
+    },
+    {
+      "type": "command",
+      "id": "toggleDateBack",
+      "label": {
+        "default": "开启／关闭日期后背"
+      }
+    }
+  ],
+  "requiredPermissions": {
+    "network": {
+      "domains": [
+        "localhost",
+        "http://localhost",
+        "http://localhost:49321"
+      ]
+    },
+    "localFileSystem": "request"
+  }
+}

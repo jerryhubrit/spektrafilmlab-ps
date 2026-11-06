@@ -1,0 +1,7 @@
+build/
+dist/
+plugin/config.json
+*.ccx
+*.dSYM/
+.DS_Store
+vendor/SpektraLab/engine/build/

@@ -1,0 +1,20 @@
+{
+  "SpektraLab": {
+    "url": "https://github.com/JamesQiu2005/SpektraLab",
+    "commit": "02d82b56cf65f0f8e802a708612edc4e9a4790af",
+    "included": "vendor/SpektraLab/engine",
+    "engine_source_modified": false
+  },
+  "spektrafilm": {
+    "url": "https://github.com/andreavolpato/spektrafilm",
+    "author": "Andrea Volpato",
+    "resource_license": "CC BY-SA 4.0"
+  },
+  "release": {
+    "version": "0.3.1",
+    "platform": "macOS",
+    "architecture": "arm64",
+    "deployment_target": "15.0",
+    "signing": "ad-hoc; not notarized"
+  }
+}
