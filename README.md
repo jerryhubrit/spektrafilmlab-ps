@@ -70,3 +70,8 @@ UXP 面板负责交互与 PS 图像读写；Swift 辅助程序在本机调用 Ap
 - 仓库包含重建所需的插件、安装器、辅助程序、上游引擎源码和胶片资源；不要求从已安装程序中反向提取代码。
 
 维护者：[jerryhubrit](https://github.com/jerryhubrit)。本项目不代表 Adobe、SpektraLab 或各胶片品牌的官方产品。
+
+## 联系方式
+
+- 小红书：634627958
+- WeChat：124209300
