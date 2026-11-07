@@ -11,7 +11,7 @@
     "resource_license": "CC BY-SA 4.0"
   },
   "release": {
-    "version": "0.3.1",
+    "version": "0.3.2",
     "platform": "macOS",
     "architecture": "arm64",
     "deployment_target": "15.0",

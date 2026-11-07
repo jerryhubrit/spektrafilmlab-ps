@@ -35,6 +35,10 @@ def render(kind,settings):
     return response.read(),dict(response.headers),source['sourceId']
 a,head,old=render('full',settings)
 assert len(a)==w*h*8
+assert head['X-Pixel-Format']=='rgba16le'
+assert head['X-Color-Space']=='ProPhoto RGB'
+assert head['X-Transfer-Function']=='romm-rgb'
+assert head['X-Row-Order']=='top-down'
 decoded=array.array('H');decoded.frombytes(a)
 assert decoded[3::4]==pixels[3::4], 'Alpha must survive unchanged'
 assert decoded[0::4]!=pixels[0::4], 'Must execute the film pipeline'

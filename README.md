@@ -4,17 +4,17 @@
 
 基于 [SpektraLab](https://github.com/JamesQiu2005/SpektraLab) 和 Andrea Volpato 的 [spektrafilm](https://github.com/andreavolpato/spektrafilm) 的非官方开源集成。胶片算法、光谱模型和胶片资源来自上游；本项目负责 Photoshop 插件、RAW 工作流、本机通信与安装打包。
 
-[下载 macOS Apple 芯片安装包](https://github.com/jerryhubrit/spektrafilmlab-ps/releases/tag/v0.3.1) · [安装说明](docs/INSTALL.md) · [实现思路](docs/ARCHITECTURE.md) · [编译源码](docs/BUILD.md) · [上游与许可证](NOTICE.md)
+[下载 macOS Apple 芯片安装包](https://github.com/jerryhubrit/spektrafilmlab-ps/releases/tag/v0.3.2) · [安装说明](docs/INSTALL.md) · [实现思路](docs/ARCHITECTURE.md) · [编译源码](docs/BUILD.md) · [上游与许可证](NOTICE.md)
 
 ## 安装后怎么用
 
-1. 下载 Release 中的 `SpektraFilmLab-PS-v0.3.1-macOS-arm64.zip` 并解压。
+1. 下载 Release 中的 `SpektraFilmLab-PS-v0.3.2-macOS-arm64.zip` 并解压。
 2. 双击 `安装.command`。安装器会复制引擎和胶片资源、生成这台电脑专用的连接配置、安装 PS 插件并启动引擎。**不需要 Python、Node、Xcode 或另行下载上游源码。**
 3. 打开 Photoshop → **增效工具 → SpektraFilmLab PS → SpektraFilmLab RAW 显影工作台**。
 4. 点击「打开 RAW…」，在大预览中调整。完成后点击「显影并送入 Photoshop」。
 5. 重启电脑后先双击 `启动引擎.command`；用完可双击 `停止引擎.command`。
 
-这是首个公开测试包，采用本地 ad-hoc 签名，**没有 Apple Developer ID 公证**。macOS 可能要求你在“隐私与安全性”中明确允许运行；安装器不会关闭 Gatekeeper 或批量清除隔离属性。具体步骤和排错见[安装说明](docs/INSTALL.md)。
+这是公开测试包，采用本地 ad-hoc 签名，**没有 Apple Developer ID 公证**。macOS 可能要求你在“隐私与安全性”中明确允许运行；安装器不会关闭 Gatekeeper 或批量清除隔离属性。具体步骤和排错见[安装说明](docs/INSTALL.md)。
 
 ### 运行环境
 
@@ -50,13 +50,16 @@ UXP 面板负责交互与 PS 图像读写；Swift 辅助程序在本机调用 Ap
 
 ## 验证与限制
 
+**v0.3.2：RAW 处理边界加固。** 保留 Apple Core Image → Float32 线性 ProPhoto → 胶片引擎的流程；新增 PS 写入前的位深、色彩空间、传递函数与行方向校验。上游固定版本已经使用内存传输，TIFF 是其旧的中转方式。逐像素验证和适用范围见 [RAW 处理说明](docs/RAW-PIPELINE.md) 与 [验证记录](docs/RAW-VALIDATION.md)。
+
 开发机上，一张约 3274 万像素的 RAW：一次白平衡预览约 0.30 秒；完整显影并写入 PS 约 2.3 秒；加片边及日期后约 4.0 秒。这些是单次本机观测，不是所有机器和参数的性能保证。
 
-- 15 项 JS 状态／日期／构图／模态回归；原生合成 RGB、透明度、缓存一致性、片边与日期测试；实际 PS RAW 到 16 位文档交接。发布包另做安装准备、独立令牌、权限、动态库和 Metal 渲染检查。
+- 22 项 JS 状态／日期／构图／模态回归；原生合成 RGB、透明度、缓存一致性、片边与日期测试；实际 PS RAW 到 16 位文档交接。发布包另做安装准备、独立令牌、权限、动态库和 Metal 渲染检查。
 - 本版没有批量处理、双图半格拼接、自由旋转裁切、暗角、完整宽容度图表或可回改 RAW 的智能滤镜。
 - 预览不是 1:1 颗粒校样；检查完整分辨率输出再决定最终效果。
 - PS 入口不读取拍摄 EXIF，日期可手动指定；透明 PS 图像需要先添加不透明背景才能使用片边。
 - macOS 15 和其他 PS 版本尚未逐一实机验证。
+- v0.3.2 的两张公开 NEF/CR2 验证不能代表所有 RAW。此轮没有重新完成客户 ARW 或 Photoshop 实机 UI 验收；升级需同时更新面板和引擎，旧引擎会被新版面板拒绝。
 
 ## 隐私、源码与许可
 

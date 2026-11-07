@@ -19,7 +19,7 @@ base={'sourceId':s['sourceId'],'params':params}
 def preview(decode): return json.load(call('/raw/render',dict(base,decode=decode)))
 a=preview({}); b=preview({})
 assert a['image']==b['image'],'Cached and initial RAW outputs must agree'
-assert max(a['width'],a['height'])==1024
+assert max(a['width'],a['height'])==min(1024,max(s['width'],s['height']))
 c=preview({'temperature':6200,'tint':25})
 assert c['image']!=a['image'],'RAW WB must alter output'
 assert c['original']!=a['original'],'Original comparison must share adjusted WB'
@@ -31,14 +31,24 @@ if s['lensSupported']:
 latitude=json.load(call('/raw/latitude',{'sourceId':s['sourceId'],'placement':{}}))
 print('latitude keys',list(latitude), 'fit keys',list(latitude.get('fit',{})),flush=True)
 fit=latitude['fit']
-assert fit['valid'], 'Native suggested latitude fit must be valid'
-assert 'params_delta' in fit
-fitparams=dict(params,**fit['params_delta'])
-fitted=json.load(call('/raw/render',dict(base,params=fitparams,decode={})))
-assert fitted['image'].startswith('data:image/png;base64,')
-report={'status':'passed','size':[s['width'],s['height']], 'preview_ms':a['ms'],'cached_ms':b['ms'],'white_balance_ms':c['ms'],'as_shot_reset_ms':d['ms'],'lens_supported':s['lensSupported'],'checks':['RAW decoding','preview geometry','cached parity','white balance effect','comparison WB','exact as-shot restore','lens restore','native scene latitude fit']}
+assert isinstance(fit['valid'],bool)
+if fit['valid']:
+    assert 'params_delta' in fit
+    fitparams=dict(params,**fit['params_delta'])
+    fitted=json.load(call('/raw/render',dict(base,params=fitparams,decode={})))
+    assert fitted['image'].startswith('data:image/png;base64,')
+else:
+    # Some scenes cannot fit the chosen medium. The native contract refuses
+    # those fits; treating every scene as fit-able was a test assumption.
+    assert fit['issues'] and 'params_delta' not in fit
+    assert preview({})['image']==a['image'],'Refused fit must not alter the negative'
+report={'status':'passed','size':[s['width'],s['height']], 'preview_ms':a['ms'],'cached_ms':b['ms'],'white_balance_ms':c['ms'],'as_shot_reset_ms':d['ms'],'lens_supported':s['lensSupported'],'latitude_fit_valid':fit['valid'],'latitude_issues':[issue['code'] for issue in fit.get('issues',[])],'checks':['RAW decoding','preview geometry','cached parity','white balance effect','comparison WB','exact as-shot restore','lens restore' if s['lensSupported'] else 'unsupported lens correction reported','native scene latitude result or safe refusal']}
 if '--full' in sys.argv:
     start=time.monotonic();r=call('/raw/render',dict(base,decode={},full=True))
+    assert r.headers['X-Pixel-Format']=='rgba16le'
+    assert r.headers['X-Color-Space']=='ProPhoto RGB'
+    assert r.headers['X-Transfer-Function']=='romm-rgb'
+    assert r.headers['X-Row-Order']=='top-down'
     w,h=int(r.headers['X-Width']),int(r.headers['X-Height']); total=0
     while True:
         block=r.read(1024*1024)

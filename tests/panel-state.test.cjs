@@ -16,6 +16,8 @@ function panel() {
   let renders = 0;
   let modal = false, requireModal = false, nativeDepthOnly = false;
   let rawFile=null, rawFailure=false, putFailure=false;
+  let outputContract={'X-Pixel-Format':'rgba16le','X-Color-Space':'ProPhoto RGB','X-Transfer-Function':'romm-rgb','X-Row-Order':'top-down'};
+  const imageWrites=[];
   const created=[];
   const pixelReads=[];
   const imageData = {width:100,height:80,components:3, getData:async()=>new Uint16Array(100*80*3),dispose(){}};
@@ -34,7 +36,8 @@ function panel() {
           if (nativeDepthOnly && options.componentSize !== undefined) throw new Error('Photoshop -32005 depth conversion');
           if (options.colorProfile === 'sRGB IEC61966-2.1' && failComparison) throw new Error('comparison read failed');
           return {imageData};
-        },encodeImageData:async()=>'',createImageDataFromBuffer:async()=>{
+        },encodeImageData:async()=>'',createImageDataFromBuffer:async(data,options)=>{
+          imageWrites.push({data,options});
           assert.equal(modal,true);return {dispose(){}};
         },putPixels:async options=>{assert.equal(modal,true);assert.equal(options.documentID,2);if(putFailure)throw new Error('put failed');}}};
       if (name === 'uxp') return {entrypoints:{setup(){}},storage:{localFileSystem:{getFileForOpening:async()=>rawFile}}};
@@ -52,12 +55,12 @@ function panel() {
       }
       if (url.endsWith('/raw/render')) {
         assert.equal(modal,false,'Network and RAW rendering must be outside modal scope');
-        return {ok:true,headers:{get:()=>2},arrayBuffer:async()=>new Uint16Array(16).buffer,
+        return {ok:true,headers:{get:key=>key==='X-Width'||key==='X-Height'?'2':outputContract[key]??null},arrayBuffer:async()=>new Uint16Array(16).buffer,
           json:async()=>({image:'data:image/png;base64,test',original:'data:image/png;base64,original',width:2,height:2,ms:10})};
       }
       if (url.endsWith('/render')) {
         renders++;
-        if(JSON.parse(options.body).sourceId==='test-full') return {ok:true,headers:{get:key=>key==='X-Width'?104:120},arrayBuffer:async()=>new Uint16Array(104*120*4).buffer};
+        if(JSON.parse(options.body).sourceId==='test-full') return {ok:true,headers:{get:key=>key==='X-Width'?104:key==='X-Height'?120:outputContract[key]??null},arrayBuffer:async()=>new Uint16Array(104*120*4).buffer};
         return {ok:true,arrayBuffer:async()=>new Uint8Array([137,80,78,71]).buffer};
       }
       throw new Error(url);
@@ -66,7 +69,7 @@ function panel() {
     btoa:value=>Buffer.from(value,'binary').toString('base64')
   });
   vm.runInContext(fs.readFileSync(require.resolve('../plugin/main.js'),'utf8'),context);
-  return {context,el,doc,created,pixelReads,chooseRAW(){rawFile={nativePath:'/test/chart.dng'};},failRAW(){rawFailure=true;},failPut(){putFailure=true;},failComparison(){failComparison=true;},requireModal(){requireModal=true;},nativeDepthOnly(){nativeDepthOnly=true;},renders:()=>renders};
+  return {context,el,doc,created,pixelReads,imageWrites,setContract(key,value){outputContract[key]=value;},chooseRAW(){rawFile={nativePath:'/test/chart.dng'};},failRAW(){rawFailure=true;},failPut(){putFailure=true;},failComparison(){failComparison=true;},requireModal(){requireModal=true;},nativeDepthOnly(){nativeDepthOnly=true;},renders:()=>renders};
 }
 
 test('failed recapture invalidates the entire previous preview and apply state', async () => {
@@ -150,4 +153,27 @@ test('RAW framing and stable effect seeds are shared by preview and full request
   assert.equal(first.overscan_camera_seed,second.overscan_camera_seed);
   assert.equal(p.context.decodeControls().crop.aspect,65/24);
   assert.equal(p.context.decodeControls().crop.y,1);
+});
+
+for (const [key,value] of [
+  ['X-Pixel-Format','rgba32f'],['X-Color-Space','sRGB'],
+  ['X-Transfer-Function','linear'],['X-Row-Order','bottom-up'],['X-Pixel-Format',null]
+]) test('RAW transfer refuses mismatched or missing pixel contract: '+key+'='+value,async()=>{
+  const p=panel();await p.context.connect();p.chooseRAW();await p.context.openRAW();p.setContract(key,value);
+  await p.context.sendRAW();
+  assert.equal(p.created.length,0,'Unsafe pixels must not create a PS document');
+  assert.match(p.el('status').textContent,/像素|引擎/);
+});
+
+test('Photoshop RGB transfer also rejects a mismatched profile',async()=>{
+  const p=panel();await p.context.connect();await p.context.capture();
+  p.el('edgeActive').checked=true;p.setContract('X-Color-Space','sRGB');await p.context.apply();
+  assert.equal(p.created.length,0);
+});
+
+test('RAW writes keep full-range UInt16 pixels and ProPhoto tagging together',async()=>{
+  const p=panel();await p.context.connect();p.chooseRAW();await p.context.openRAW();await p.context.sendRAW();
+  const image=p.imageWrites.at(-1);
+  assert.ok(image.data instanceof Uint16Array);
+  assert.equal(image.options.colorProfile,'ProPhoto RGB');assert.equal(image.options.fullRange,true);
 });

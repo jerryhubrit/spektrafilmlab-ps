@@ -4,7 +4,7 @@
 
 需要 Apple 芯片 Mac、macOS 15 或更新、Photoshop 25 或更新，以及 Adobe Creative Cloud 桌面程序。当前实测环境为 macOS 26.6.2 / Photoshop 27.11.0。此包不支持 Windows 或 Intel Mac。
 
-从本项目 [v0.3.1 Release](https://github.com/jerryhubrit/spektrafilmlab-ps/releases/tag/v0.3.1) 下载完整 ZIP，解压到一个保留的位置。不要只下载源代码 ZIP，也不要只取出一个可执行文件。
+从本项目 [v0.3.2 Release](https://github.com/jerryhubrit/spektrafilmlab-ps/releases/tag/v0.3.2) 下载完整 ZIP，解压到一个保留的位置。不要只下载源代码 ZIP，也不要只取出一个可执行文件。
 
 ## 第一次安装
 

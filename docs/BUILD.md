@@ -19,6 +19,8 @@ node --test tests/panel-state.test.cjs tests/film-effects.test.cjs
 python3 tests/release-package.test.py
 ```
 
+RAW 边界额外验证：`bash scripts/test-raw-pipeline.sh --full /absolute/path/sample.NEF`。无相机文件时必须显式使用 `--synthetic-only`，报告会标明相机覆盖未运行。安装包端到端 RAW 验证可将路径追加到 `python3 tests/release-package.test.py /absolute/path/sample.NEF`；这会在独立 49322 端口调用完整显影及输出格式检查。详见 [RAW-PIPELINE.md](RAW-PIPELINE.md)。
+
 If Xcode reports the Metal compiler is missing, install the Metal Toolchain component through Xcode. Do not remove safe/precise math flags from the engine build to work around a toolchain problem.
 
 `MACOSX_DEPLOYMENT_TARGET=15.0` applies to the C++ engine. Swift binaries explicitly target `arm64-apple-macos15.0`. Upstream's Metal build targets macOS 15 and checks that target. Each executable/dylib is ad-hoc signed after compilation, not Developer ID signed or notarized. Exact Mach-O bytes can vary by toolchain; source revision and release artifact SHA256 values are recorded.

@@ -151,6 +151,17 @@ async function upload(image, kind) {
   const result = await request('/source?width='+image.width+'&height='+image.height+'&channels='+image.components+'&kind='+kind, data.buffer, true);
   return result.json();
 }
+// Full output has already received the engine's ProPhoto transfer function.
+// Never tag arbitrary bytes as ProPhoto merely because their length matches.
+function assertOutputContract(response) {
+  const expected={'X-Pixel-Format':'rgba16le','X-Color-Space':'ProPhoto RGB',
+    'X-Transfer-Function':'romm-rgb','X-Row-Order':'top-down'};
+  for (const key in expected) {
+    if(response.headers.get(key)!==expected[key]) {
+      throw new Error('引擎返回的像素格式或色彩空间不匹配，请安装并启动与面板配套的新版引擎。');
+    }
+  }
+}
 function setImage(url) {
   $('preview').src = url; $('preview').style.display = 'block'; $('placeholder').style.display = 'none';
 }
@@ -253,6 +264,7 @@ async function apply() {
     const full=await upload(input,'full');
     status('正在计算完整尺寸胶片效果…');
     const response = await request('/render',{sourceId:full.sourceId,params});
+    assertOutputContract(response);
     if(params.overscan_active) { w=Number(response.headers.get('X-Width'));h=Number(response.headers.get('X-Height')); }
     const output = new Uint16Array(await response.arrayBuffer());
     if (output.length !== w*h*4) throw new Error('引擎返回的图像尺寸不匹配。');
@@ -325,6 +337,7 @@ async function sendRAW() {
     while(rendering) await new Promise(resolve=>setTimeout(resolve,20));
     const started=Date.now(); status('正在显影完整尺寸 RAW，请稍候…');
     const response=await request('/raw/render',{sourceId:snapshot.sourceId,params,decode,full:true});
+    assertOutputContract(response);
     const w=Number(response.headers.get('X-Width')), h=Number(response.headers.get('X-Height'));
     const output=new Uint16Array(await response.arrayBuffer());
     if(!w || !h || output.length!==w*h*4) throw new Error('RAW 输出尺寸不匹配。');

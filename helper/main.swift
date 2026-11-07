@@ -158,7 +158,9 @@ final class FilmEngine {
         if isPreview {
             return Response(body: try png(packed, width: w, height: h), type: "image/png", headers: headers)
         }
-        return Response(body: packed, type: "application/octet-stream", headers: headers)
+        let contract = ["X-Pixel-Format": "rgba16le", "X-Color-Space": "ProPhoto RGB",
+                        "X-Transfer-Function": "romm-rgb", "X-Row-Order": "top-down"]
+        return Response(body: packed, type: "application/octet-stream", headers: headers.merging(contract) { _, new in new })
     }
     func png(_ data: Data, width: Int, height: Int) throws -> Data {
         guard let space = CGColorSpace(name: CGColorSpace.rommrgb),
@@ -237,7 +239,7 @@ final class Connection {
                         do {
                             switch (request.method, request.path) {
                             case ("GET", "/health"):
-                                response = Response(body: jsonData(["ok": true, "version": "0.3.1", "engine": "native-metal", "catalog": engine.catalog]))
+                                response = Response(body: jsonData(["ok": true, "version": "0.3.2", "engine": "native-metal", "catalog": engine.catalog]))
                             case ("POST", "/source"):
                                 response = Response(body: try engine.source(request))
                             case ("POST", "/render"):
@@ -272,6 +274,10 @@ final class Connection {
     }
 }
 
+#if RAW_PIPELINE_TEST
+do { try runRAWPipelineTests() }
+catch { fputs("RAW pipeline validation failed: \(error)\n", stderr); exit(1) }
+#else
 do {
     guard CommandLine.arguments.count == 3 else { throw fail("Usage: FilmLabHelper RESOURCES CONFIG_JSON") }
     let config = try object(Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[2])))
@@ -284,9 +290,10 @@ do {
     let listener = try NWListener(using: parameters)
     listener.newConnectionHandler = { Connection($0, token: token, engine: engine).start() }
     listener.stateUpdateHandler = { state in
-        if case .ready = state { print("FilmLab 0.3.1 ready at 127.0.0.1:\(portValue) — native Metal, local only"); fflush(stdout) }
+        if case .ready = state { print("FilmLab 0.3.2 ready at 127.0.0.1:\(portValue) — native Metal, local only"); fflush(stdout) }
         if case .failed(let error) = state { fputs("Listener failed: \(error)\n", stderr); exit(1) }
     }
     listener.start(queue: networkQueue)
     dispatchMain()
 } catch { fputs("FilmLab: \((error as? Failure)?.message ?? error.localizedDescription)\n", stderr); exit(1) }
+#endif

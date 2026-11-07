@@ -6,6 +6,7 @@ from pathlib import Path
 import socket
 import stat
 import subprocess
+import sys
 import tempfile
 import urllib.request
 import zipfile
@@ -62,6 +63,9 @@ with tempfile.TemporaryDirectory(prefix='spektrafilmlab-release-') as temp:
         env = dict(os.environ, FILMLAB_CONFIG=str(first / 'config.json'))
         for name in ('native_smoke.py', 'edge_smoke.py'):
             run('python3', ROOT / 'tests' / name, env=env)
+        for index, path in enumerate(sys.argv[1:], 1):
+            run('python3', ROOT / 'tests/raw_smoke.py', Path(path).resolve(), '--full', env=env)
+            (ROOT / 'build' / f'raw-smoke-{index}.json').write_bytes((ROOT / 'build/raw-smoke.json').read_bytes())
     finally:
         run(setup, 'stop-at', first)
     with socket.socket() as probe:
